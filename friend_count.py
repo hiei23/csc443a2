@@ -20,20 +20,29 @@ def mapper(record):
 
     if key not in friend_list:
         friend_list[key] =[value]
-
+        mr.emit_intermediate(key, 0)
+        mr.emit_intermediate(value, 0)
+        
     if key in friend_list:
+
         if value not in friend_list[key]:
             friend_list[key].append(value)
+            mr.emit_intermediate(value, 0)
+
         if value in friend_list[key] and value in friend_list:
+
             if key in friend_list[value]:
-                mr.emit_intermediate(key, value)
-                mr.emit_intermediate(value, key)
+                mr.emit_intermediate(key, 1)
+                mr.emit_intermediate(value, 1)
 
 def reducer(key, list_of_values):
     # key: word
     # value: list of occurrence counts
     total = 0
-    mr.emit((key, list_of_values))
+
+    for count in list_of_values:
+        total += count
+    mr.emit((key, total))
 
 # Do not modify below this line
 # =============================
