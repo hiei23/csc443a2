@@ -21,10 +21,21 @@ def mapper(record):
 def reducer(key, list_of_values):
     # key: word
     # value: list of occurrence counts
-    first_table = list_of_values[0]
-    for list in list_of_values[1:]:
-      joined_table=first_table + list
-      mr.emit(joined_table)
+
+    line_item_tuples = []
+    order_tuples = []
+    
+    for v in list_of_values:
+
+        if (v[0] == "line_item"):
+            line_item_tuples += [v]
+        else:
+            order_tuples +=[v]
+        
+    for o in order_tuples:
+        for l in line_item_tuples: 
+            joined_row = o+l
+            mr.emit(joined_row)
 
 # Do not modify below this line
 # =============================

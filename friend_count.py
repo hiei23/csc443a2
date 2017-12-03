@@ -7,45 +7,45 @@ Word Count Example in the Simple Python MapReduce Framework
 
 mr = MapReduce.MapReduce()
 
+
 # =============================
 # Do not modify above this line
 
-#global variable to keep track of friends locally
-friend_list = {}
 def mapper(record):
     # key: document identifier
     # value: document contents
-    key = record[0]
-    value = record[1]
+    mr.emit_intermediate(1, record)
 
-    if key not in friend_list:
-        friend_list[key] =[value]
-        mr.emit_intermediate(key, 0)
-        mr.emit_intermediate(value, 0)
-        
-    if key in friend_list:
-
-        if value not in friend_list[key]:
-            friend_list[key].append(value)
-            mr.emit_intermediate(value, 0)
-
-        if value in friend_list[key] and value in friend_list:
-
-            if key in friend_list[value]:
-                mr.emit_intermediate(key, 1)
-                mr.emit_intermediate(value, 1)
 
 def reducer(key, list_of_values):
-    # key: word
-    # value: list of occurrence counts
-    total = 0
+    friend_list = {}
+    true_friends = {}
 
-    for count in list_of_values:
-        total += count
-    mr.emit((key, total))
+    for friend in list_of_values:
+        friendA = friend[0]
+        friendB = friend[1]
+
+        if friendA in friend_list:
+            friend_list[friendA] += [friendB]
+
+        if friendA not in friend_list:
+            friend_list[friendA] = [friendB]
+            true_friends[friendA] = 0
+
+        if friendB not in friend_list:
+            friend_list[friendB] = []
+            true_friends[friendB] = 0
+
+        # check if they are true friends
+        if friendA in friend_list[friendB] and friendB in friend_list[friendA]:
+        	true_friends[friendA] += 1
+        	true_friends[friendB] += 1
+
+    for name, count in true_friends.items():
+    	mr.emit((name, count))
 
 # Do not modify below this line
 # =============================
 if __name__ == '__main__':
-  inputdata = open(sys.argv[1])
-  mr.execute(inputdata, mapper, reducer)
+    inputdata = open(sys.argv[1])
+    mr.execute(inputdata, mapper, reducer)

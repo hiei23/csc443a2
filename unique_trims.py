@@ -23,7 +23,6 @@ def reducer(key, list_of_values):
     # value: list of occurrence counts
 
     nucleotides = list_of_values[0]
-
     mr.emit(key)
 
 # Do not modify below this line
